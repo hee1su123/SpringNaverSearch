@@ -1,22 +1,15 @@
-package com.example.springstudy2.controller;
+package com.example.springstudy2.repository;
 
-import com.example.springstudy2.dto.ProductMypriceRequestDto;
-import com.example.springstudy2.dto.ProductRequestDto;
 import com.example.springstudy2.model.Product;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
-@RestController
-public class AllInOneController {
+public class ProductRepository {
+    public void createProduct(Product product) throws SQLException {
 
-    @PostMapping("/api/products")
-    public Product createProduct(@RequestBody ProductRequestDto requestDto) throws SQLException {
-        Product product = new Product(requestDto);
-// DB connect
+        // DB connect
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
 
         PreparedStatement ps = connection.prepareStatement("select max(id) as id from product");
@@ -37,18 +30,16 @@ public class AllInOneController {
 
         ps.executeUpdate();
 
-// DB disconnect
+        // DB disconnect
         ps.close();
         connection.close();
-
-        return product;
     }
 
-    @PutMapping("/api/products/{id}")
-    public Long updateProduct(@PathVariable Long id, @RequestBody ProductMypriceRequestDto requestDto) throws SQLException {
+    public Product getProduct(Long id) throws SQLException {
+
         Product product = new Product();
 
-// DB connect
+        // DB connect
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
 
         PreparedStatement ps = connection.prepareStatement("select * from product where id = ?");
@@ -62,29 +53,36 @@ public class AllInOneController {
             product.setLprice(rs.getInt("lprice"));
             product.setMyprice(rs.getInt("myprice"));
             product.setTitle(rs.getString("title"));
-        } else {
-            throw new NullPointerException("해당 아이디가 존재하지 않습니다.");
         }
 
-        ps = connection.prepareStatement("update product set myprice = ? where id = ?");
-        ps.setInt(1, requestDto.getMyprice());
-        ps.setLong(2, product.getId());
-
-        ps.executeUpdate();
-
-// DB disconnect
+        // DB disconnect
         rs.close();
         ps.close();
         connection.close();
 
-        return product.getId();
+        return product;
     }
 
-    @GetMapping("/api/products")
+    public void updateMyprice(Long id, int myprice) throws SQLException {
+
+        // DB connect
+        Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
+
+        PreparedStatement ps = connection.prepareStatement("update product set myprice = ? where id = ?");
+        ps.setInt(1, myprice);
+        ps.setLong(2, id);
+
+        ps.executeUpdate();
+
+        // DB disconnect
+        ps.close();
+        connection.close();
+    }
+
     public List<Product> getProducts() throws SQLException {
         List<Product> products = new ArrayList<>();
 
-// DB connect
+        // DB connect
         Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
 
         Statement stmt = connection.createStatement();
@@ -101,7 +99,7 @@ public class AllInOneController {
             products.add(product);
         }
 
-// DB disconnect
+        // DB disconnect
         rs.close();
         connection.close();
 
