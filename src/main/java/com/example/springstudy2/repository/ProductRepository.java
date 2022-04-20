@@ -7,10 +7,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProductRepository {
+
+    private final String dbUrl;
+    private final String dbId;
+    private final String dbPassword;
+
+    public ProductRepository(String dbUrl, String dbId, String dbPassword) {
+        this.dbUrl = dbUrl;
+        this.dbId = dbId;
+        this.dbPassword = dbPassword;
+
+    }
+
     public void createProduct(Product product) throws SQLException {
 
         // DB connect
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
+        Connection connection = DriverManager.getConnection(dbUrl, dbId, dbPassword);
 
         PreparedStatement ps = connection.prepareStatement("select max(id) as id from product");
         ResultSet rs = ps.executeQuery();
@@ -40,7 +52,7 @@ public class ProductRepository {
         Product product = new Product();
 
         // DB connect
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
+        Connection connection = DriverManager.getConnection(dbUrl, dbId, dbPassword);
 
         PreparedStatement ps = connection.prepareStatement("select * from product where id = ?");
         ps.setLong(1, id);
@@ -66,7 +78,7 @@ public class ProductRepository {
     public void updateMyprice(Long id, int myprice) throws SQLException {
 
         // DB connect
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
+        Connection connection = DriverManager.getConnection(dbUrl, dbId, dbPassword);
 
         PreparedStatement ps = connection.prepareStatement("update product set myprice = ? where id = ?");
         ps.setInt(1, myprice);
@@ -83,7 +95,7 @@ public class ProductRepository {
         List<Product> products = new ArrayList<>();
 
         // DB connect
-        Connection connection = DriverManager.getConnection("jdbc:h2:mem:springcoredb", "sa", "");
+        Connection connection = DriverManager.getConnection(dbUrl, dbId, dbPassword);
 
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery("select * from product");
