@@ -25,38 +25,37 @@ public class ProductService {
     public ProductService(ApplicationContext context) {
         // 빈 이름으로 찾기
 //        ProductRepository productRepository = (ProductRepository) context.getBean("productRepository");
-
         // 빈 클래스 형식으로 찾기
         ProductRepository productRepository = context.getBean(ProductRepository.class);
-
 
         this.productRepository = productRepository;
     }
 
-    public Product createProduct(ProductRequestDto requestDto) throws SQLException {
+    public Product createProduct(ProductRequestDto requestDto) {
 
         Product product = new Product(requestDto);
 
-        productRepository.createProduct(product);
+        productRepository.save(product);
 
         return product;
     }
 
-    public Product updateProduct(Long id, ProductMypriceRequestDto requestDto) throws SQLException {
+    public Product updateProduct(Long id, ProductMypriceRequestDto requestDto) {
 
-        Product product = productRepository.getProduct(id);
+        Product product = productRepository.findById(id).orElseThrow(() -> new NullPointerException("아이디 없음"));
         if (product == null) {
             throw new NullPointerException("해당 아이디가 존재하지 않습니다.");
         }
 
-        productRepository.updateMyprice(id, requestDto.getMyprice());
+        product.setMyprice(requestDto.getMyprice());
+        productRepository.save(product);
 
         return product;
     }
 
-    public List<Product> getProducts() throws SQLException {
+    public List<Product> getProducts() {
 
-        List<Product> products = productRepository.getProducts();
+        List<Product> products = productRepository.findAll();
 
         return products;
     }
